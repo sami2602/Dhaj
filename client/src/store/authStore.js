@@ -1,28 +1,78 @@
 import { create } from 'zustand';
 
-export const useAuthStore = create((set) => ({
-  user: {
-    _id: 'u_demo',
-    name: 'Gentleman Patron',
-    email: 'patron@dhaj.com',
-    role: 'user',
-    addresses: [
-      { label: 'Boutique Residence', street: 'Gulberg III, Block MM', city: 'Lahore', isDefault: true }
-    ],
-    stylePreferences: {
-      fit: 'Tailored Slim Fit',
-      favoriteColors: ['Obsidian Black', 'Antique Gold', 'Midnight Charcoal'],
-      occasions: ['Eid', 'Royal Weddings', 'Mehndi'],
-      budgetRange: { min: 10000, max: 80000 },
-      bodyType: 'V-Taper Athletic'
-    }
-  },
-  token: 'mock_jwt_token_2026',
-  isAuthenticated: true,
+const STORAGE_KEY = 'dhaj_auth';
 
-  login: (userData, token) => set({ user: userData, token, isAuthenticated: true }),
-  logout: () => set({ user: null, token: null, isAuthenticated: false }),
-  updatePreferences: (prefs) => set((state) => ({
-    user: { ...state.user, stylePreferences: { ...state.user.stylePreferences, ...prefs } }
-  }))
+const loadStoredAuth = () => {
+  if (typeof window === 'undefined') {
+    return { user: null, token: null, isAuthenticated: false };
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return { user: null, token: null, isAuthenticated: false };
+    }
+
+    const parsed = JSON.parse(raw);
+    return {
+      user: parsed.user || null,
+      token: parsed.token || null,
+      isAuthenticated: Boolean(parsed.user && parsed.token)
+    };
+  } catch (error) {
+    return { user: null, token: null, isAuthenticated: false };
+  }
+};
+
+const persistAuth = (user, token) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }));
+};
+
+const clearStoredAuth = () => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(STORAGE_KEY);
+};
+
+const storedAuth = loadStoredAuth();
+
+export const useAuthStore = create((set) => ({
+  user: storedAuth.user,
+  token: storedAuth.token,
+  isAuthenticated: storedAuth.isAuthenticated,
+  isAuthLoading: false,
+  authError: '',
+
+  setAuthLoading: (isAuthLoading) => set({ isAuthLoading }),
+  setAuthError: (authError) => set({ authError }),
+  clearAuthError: () => set({ authError: '' }),
+  login: (userData, token) => {
+    persistAuth(userData, token);
+    set({ user: userData, token, isAuthenticated: true, authError: '' });
+  },
+  logout: () => {
+    clearStoredAuth();
+    set({ user: null, token: null, isAuthenticated: false, authError: '' });
+  },
+  setUser: (userData) => {
+    set((state) => {
+      persistAuth(userData, state.token);
+      return { user: userData, isAuthenticated: Boolean(userData && state.token) };
+    });
+  },
+  updatePreferences: (prefs) =>
+    set((state) => {
+      const nextUser = state.user
+        ? {
+            ...state.user,
+            stylePreferences: { ...state.user.stylePreferences, ...prefs }
+          }
+        : state.user;
+
+      if (nextUser && state.token) {
+        persistAuth(nextUser, state.token);
+      }
+
+      return { user: nextUser };
+    })
 }));

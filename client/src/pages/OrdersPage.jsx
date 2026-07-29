@@ -1,8 +1,33 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { Package, Truck, CheckCircle2, Clock } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
+import API_BASE_URL, { getAuthConfig } from '../lib/api';
 
 export default function OrdersPage({ setActivePage, lastOrder }) {
-  const mockOrders = [
+  const token = useAuthStore((state) => state.token);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!token) return;
+
+      try {
+        setLoadingOrders(true);
+        const res = await axios.get(`${API_BASE_URL}/orders/my-orders`, getAuthConfig(token));
+        setOrders(res.data?.orders || []);
+      } catch (error) {
+        console.log('Orders sync unavailable, using local order history');
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    fetchOrders();
+  }, [token]);
+
+  const fallbackOrders = [
     {
       _id: 'ord_1',
       orderNumber: 'DHAJ-894210',
@@ -15,16 +40,29 @@ export default function OrdersPage({ setActivePage, lastOrder }) {
     }
   ];
 
-  if (lastOrder) {
-    mockOrders.unshift({
-      _id: lastOrder._id || 'ord_recent',
-      orderNumber: lastOrder.orderNumber,
-      date: 'Today',
-      total: lastOrder.totalAmount,
-      status: 'Processing at Atelier',
-      items: lastOrder.items || []
-    });
-  }
+  const visibleOrders = useMemo(() => {
+    const baseOrders = orders.length > 0 ? orders : fallbackOrders;
+    const normalizedOrders = baseOrders.map((ord) => ({
+      ...ord,
+      date: ord.date || (ord.createdAt ? new Date(ord.createdAt).toLocaleDateString() : 'Recently'),
+      total: ord.total ?? ord.totalAmount ?? 0,
+      status: ord.status || ord.orderStatus || 'Processing',
+      items: ord.items || []
+    }));
+
+    if (lastOrder) {
+      normalizedOrders.unshift({
+        _id: lastOrder._id || 'ord_recent',
+        orderNumber: lastOrder.orderNumber,
+        date: 'Today',
+        total: lastOrder.totalAmount,
+        status: 'Processing at Atelier',
+        items: lastOrder.items || []
+      });
+    }
+
+    return normalizedOrders;
+  }, [fallbackOrders, lastOrder, orders]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20 space-y-8 text-white">
@@ -33,13 +71,16 @@ export default function OrdersPage({ setActivePage, lastOrder }) {
         <h1 className="text-3xl font-serif tracking-wider uppercase mt-1">Patron Order History</h1>
       </div>
 
+      {loadingOrders && <p className="text-xs text-stone-500">Refreshing your latest orders...</p>}
+
       <div className="space-y-6">
-        {mockOrders.map((ord) => (
+        {visibleOrders.map((ord) => (
           <div key={ord._id} className="bg-[#0E0E14] border border-stone-800 rounded-xl p-6 space-y-4 shadow-2xl">
             <div className="flex flex-col sm:flex-row justify-between border-b border-stone-800 pb-3 gap-2">
               <div>
                 <span className="text-[10px] text-stone-400 uppercase">Order ID:</span>
                 <h3 className="font-serif text-base font-bold text-[#D4AF37]">{ord.orderNumber}</h3>
+                <p className="text-[10px] text-stone-500 mt-1">{ord.date}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded border border-emerald-800 font-medium">

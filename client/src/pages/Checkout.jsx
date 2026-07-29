@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { ShieldCheck, ArrowRight, Lock, CheckCircle2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 import axios from 'axios';
+import API_BASE_URL, { getAuthConfig } from '../lib/api';
 
 export default function Checkout({ setActivePage, setLastOrder }) {
   const { cart, getTotal, getSubtotal, clearCart } = useCartStore();
+  const token = useAuthStore((state) => state.token);
 
   const [form, setForm] = useState({
     name: 'Gentleman Patron',
@@ -42,7 +45,7 @@ export default function Checkout({ setActivePage, setLastOrder }) {
         dhajScore: 98
       };
 
-      const res = await axios.post('http://localhost:5000/api/orders', payload);
+      const res = await axios.post(`${API_BASE_URL}/orders`, payload, getAuthConfig(token));
       const order = res.data.order || {
         orderNumber: 'DHAJ-' + Math.floor(100000 + Math.random() * 900000),
         items: payload.items,

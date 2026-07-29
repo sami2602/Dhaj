@@ -1,19 +1,33 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Lock, Mail, User, Shield } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import API_BASE_URL from '../lib/api';
 
 export function Login({ setActivePage }) {
   const [email, setEmail] = useState('patron@dhaj.com');
   const [password, setPassword] = useState('password123');
   const login = useAuthStore((state) => state.login);
+  const isAuthLoading = useAuthStore((state) => state.isAuthLoading);
+  const authError = useAuthStore((state) => state.authError);
+  const setAuthLoading = useAuthStore((state) => state.setAuthLoading);
+  const setAuthError = useAuthStore((state) => state.setAuthError);
+  const clearAuthError = useAuthStore((state) => state.clearAuthError);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    login(
-      { _id: 'u_demo', name: email.split('@')[0], email, role: email.includes('admin') ? 'admin' : 'user' },
-      'mock_jwt_token_2026'
-    );
-    setActivePage('profile');
+
+    try {
+      setAuthLoading(true);
+      clearAuthError();
+      const res = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+      login(res.data.user, res.data.token);
+      setActivePage('profile');
+    } catch (error) {
+      setAuthError(error.response?.data?.error || 'Unable to sign in right now');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   return (
@@ -49,10 +63,17 @@ export function Login({ setActivePage }) {
 
         <button
           type="submit"
+          disabled={isAuthLoading}
           className="w-full bg-[#D4AF37] text-black font-bold text-xs py-3.5 rounded uppercase hover:bg-[#AA8825] tracking-widest"
         >
-          Sign In
+          {isAuthLoading ? 'Signing In...' : 'Sign In'}
         </button>
+
+        {authError && (
+          <p className="text-xs text-rose-400 border border-rose-900/60 bg-rose-950/30 rounded-lg px-3 py-2">
+            {authError}
+          </p>
+        )}
 
         <div className="text-center text-xs text-stone-400 pt-2">
           New to DHAJ? <button type="button" onClick={() => setActivePage('register')} className="text-[#D4AF37] hover:underline">Register Patron Account</button>
@@ -67,14 +88,26 @@ export function Register({ setActivePage }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const login = useAuthStore((state) => state.login);
+  const isAuthLoading = useAuthStore((state) => state.isAuthLoading);
+  const authError = useAuthStore((state) => state.authError);
+  const setAuthLoading = useAuthStore((state) => state.setAuthLoading);
+  const setAuthError = useAuthStore((state) => state.setAuthError);
+  const clearAuthError = useAuthStore((state) => state.clearAuthError);
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    login(
-      { _id: 'u_' + Date.now(), name, email, role: 'user' },
-      'mock_jwt_token_2026'
-    );
-    setActivePage('profile');
+
+    try {
+      setAuthLoading(true);
+      clearAuthError();
+      const res = await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password });
+      login(res.data.user, res.data.token);
+      setActivePage('profile');
+    } catch (error) {
+      setAuthError(error.response?.data?.error || 'Unable to create your account right now');
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   return (
@@ -121,10 +154,17 @@ export function Register({ setActivePage }) {
 
         <button
           type="submit"
+          disabled={isAuthLoading}
           className="w-full bg-[#D4AF37] text-black font-bold text-xs py-3.5 rounded uppercase hover:bg-[#AA8825] tracking-widest"
         >
-          Register Account
+          {isAuthLoading ? 'Creating Account...' : 'Register Account'}
         </button>
+
+        {authError && (
+          <p className="text-xs text-rose-400 border border-rose-900/60 bg-rose-950/30 rounded-lg px-3 py-2">
+            {authError}
+          </p>
+        )}
 
         <div className="text-center text-xs text-stone-400 pt-2">
           Already registered? <button type="button" onClick={() => setActivePage('login')} className="text-[#D4AF37] hover:underline">Sign In</button>

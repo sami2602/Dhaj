@@ -1,9 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { User, Sparkles, MapPin, Package, Shield, LogOut } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import API_BASE_URL, { getAuthConfig } from '../lib/api';
 
 export default function UserProfile({ setActivePage }) {
-  const { user, logout } = useAuthStore();
+  const { user, token, logout, setUser } = useAuthStore();
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!token) return;
+
+      try {
+        setLoadingProfile(true);
+        const res = await axios.get(`${API_BASE_URL}/auth/profile`, getAuthConfig(token));
+        if (res.data?.success && res.data.user) {
+          setUser(res.data.user);
+        }
+      } catch (error) {
+        console.log('Profile sync unavailable, using saved profile');
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
+  }, [token, setUser]);
 
   if (!user) {
     return (
@@ -12,6 +35,15 @@ export default function UserProfile({ setActivePage }) {
       </div>
     );
   }
+
+  const primaryAddress =
+    user.addresses?.find((address) => address.isDefault) ||
+    user.addresses?.[0] || {
+      label: 'Boutique Residence',
+      street: 'Gulberg III, Block MM Alam Road',
+      city: 'Lahore',
+      postalCode: '54000'
+    };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20 space-y-8 text-white">
@@ -26,6 +58,7 @@ export default function UserProfile({ setActivePage }) {
             <span className="text-[10px] text-[#D4AF37] uppercase font-serif tracking-widest font-bold">DHAJ Patron Account</span>
             <h1 className="font-serif text-2xl font-bold uppercase">{user.name}</h1>
             <p className="text-xs text-stone-400">{user.email}</p>
+            {loadingProfile && <p className="text-[10px] text-stone-500 mt-1">Syncing patron profile...</p>}
           </div>
         </div>
 
@@ -87,9 +120,13 @@ export default function UserProfile({ setActivePage }) {
           </div>
 
           <div className="text-xs text-stone-300 space-y-1">
-            <p className="font-bold text-white">Boutique Residence</p>
-            <p>Gulberg III, Block MM Alam Road</p>
-            <p>Lahore, Pakistan (54000)</p>
+            <p className="font-bold text-white">{primaryAddress.label || 'Primary Address'}</p>
+            <p>{primaryAddress.street || primaryAddress.address || 'Address available after your first order'}</p>
+            <p>
+              {[primaryAddress.city, primaryAddress.country || 'Pakistan', primaryAddress.postalCode]
+                .filter(Boolean)
+                .join(', ')}
+            </p>
           </div>
 
           <button
