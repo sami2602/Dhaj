@@ -1,0 +1,13 @@
+# dependencies / build output (never commit)
+**/node_modules/
+**/dist/
+**/.vite/
+**/.cache/
+
+# env
+**/.env
+**/.env.*
+
+# logs
+**/*.log
+
