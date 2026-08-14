@@ -55,7 +55,7 @@ export default function Navbar({ activePage, setActivePage }) {
           className="flex items-center gap-3 group text-left"
         >
           <img
-            src="/dhaj_logo.png"
+            src="src/assets/dhaj_logo.png"
             alt="DHAJ Logo"
             className="w-10 h-10 sm:w-12 sm:h-12 object-contain group-hover:scale-105 transition-transform duration-300"
           />

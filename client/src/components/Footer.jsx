@@ -47,7 +47,7 @@ export default function Footer({ setActivePage }) {
         {/* Brand Column */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-3">
-            <img src="/dhaj_logo.png" alt="DHAJ Logo" className="w-12 h-12 object-contain" />
+            <img src="src/assets/dhaj_logo.png" alt="DHAJ Logo" className="w-12 h-12 object-contain" />
             <div>
               <span className="font-serif text-xl tracking-[0.2em] text-white font-bold block">DHAJ</span>
               <span className="text-[10px] tracking-widest text-[#D4AF37] uppercase">APNI DHAJ. APNA ANDAAZ.</span>
