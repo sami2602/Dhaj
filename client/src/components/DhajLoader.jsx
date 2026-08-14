@@ -36,7 +36,7 @@ export default function DhajLoader({ onComplete }) {
             
             {/* The Official Uploaded DHAJ Circular Logo */}
             <motion.img
-              src="src/assets/dhaj_logo.png"
+              src="/dhaj_logo.png"
               alt="DHAJ Logo"
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
