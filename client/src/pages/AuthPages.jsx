@@ -33,7 +33,7 @@ export function Login({ setActivePage }) {
   return (
     <div className="max-w-md mx-auto px-4 pt-32 pb-20 text-white space-y-6">
       <div className="text-center space-y-2">
-        <img src="/dhaj_logo.png" alt="DHAJ Logo" className="w-16 h-16 object-contain mx-auto" />
+        <img src="src/assets/dhaj_logo.png" alt="DHAJ Logo" className="w-16 h-16 object-contain mx-auto" />
         <h1 className="text-2xl font-serif font-bold uppercase tracking-wider">Patron Portal Sign In</h1>
         <p className="text-xs text-stone-400">Access your saved AI posture profiles & order history</p>
       </div>
@@ -113,7 +113,7 @@ export function Register({ setActivePage }) {
   return (
     <div className="max-w-md mx-auto px-4 pt-32 pb-20 text-white space-y-6">
       <div className="text-center space-y-2">
-        <img src="/dhaj_logo.png" alt="DHAJ Logo" className="w-16 h-16 object-contain mx-auto" />
+        <img src="src/assets/dhaj_logo.png" alt="DHAJ Logo" className="w-16 h-16 object-contain mx-auto" />
         <h1 className="text-2xl font-serif font-bold uppercase tracking-wider">Create Patron Account</h1>
         <p className="text-xs text-stone-400">Unlock private drop access & bespoke tailoring concierge</p>
       </div>
