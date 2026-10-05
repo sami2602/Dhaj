@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, Heart, User, Sparkles, Menu, X, Shield } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
@@ -12,7 +13,6 @@ export default function Navbar({ activePage, setActivePage }) {
   const openCart = useCartStore((state) => state.openCart);
   const wishlist = useWishlistStore((state) => state.wishlist);
   const openSearch = useAIStore((state) => state.openSearch);
-  const openStylist = useAIStore((state) => state.openStylist);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlist.length;
@@ -35,154 +35,188 @@ export default function Navbar({ activePage, setActivePage }) {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-[#050506]/90 backdrop-blur-md border-b border-[#D4AF37]/20 py-3 shadow-2xl' : 'bg-gradient-to-b from-[#050506] via-[#050506]/70 to-transparent py-5'
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      isScrolled ? 'bg-[#050506]/92 backdrop-blur-xl border-b border-[#D4AF37]/25 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.8)]' : 'bg-gradient-to-b from-[#050506]/95 via-[#050506]/60 to-transparent py-5'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         
         {/* Mobile menu toggle button */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden text-stone-300 hover:text-[#D4AF37] p-1"
+          className="lg:hidden text-stone-300 hover:text-[#D4AF37] p-1.5 cursor-pointer"
           aria-label="Toggle Navigation Menu"
         >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        </motion.button>
 
         {/* Brand Logo */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
           onClick={() => setActivePage('home')}
-          className="flex items-center gap-3 group text-left"
+          className="flex items-center gap-3.5 group text-left cursor-pointer"
         >
           <img
-            src="src/assets/dhaj_logo.png"
+            src="/dhaj_logo.png"
             alt="DHAJ Logo"
-            className="w-10 h-10 sm:w-12 sm:h-12 object-contain group-hover:scale-105 transition-transform duration-300"
+            className="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(212,175,55,0.6)] transition-all duration-300"
           />
           <div className="hidden sm:block">
             <span className="block font-serif text-lg tracking-[0.25em] text-white font-bold group-hover:text-[#D4AF37] transition-colors">
               DHAJ
             </span>
-            <span className="block text-[9px] tracking-[0.2em] text-[#D4AF37] uppercase">
+            <span className="block text-[9px] tracking-[0.22em] text-[#D4AF37] uppercase font-semibold">
               APNI DHAJ. APNA ANDAAZ.
             </span>
           </div>
-        </button>
+        </motion.button>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-8">
+        <nav className="hidden lg:flex items-center space-x-9">
           {navLinks.map((link) => (
             <button
               key={link.id}
               onClick={() => setActivePage(link.id)}
-              className={`relative text-xs tracking-[0.2em] uppercase font-medium transition-colors py-1 ${
+              className={`relative text-xs tracking-[0.22em] uppercase font-semibold transition-colors py-1.5 cursor-pointer ${
                 activePage === link.id ? 'text-[#D4AF37]' : 'text-stone-300 hover:text-white'
               }`}
             >
-              {link.isAi && (
-                <span className="inline-flex items-center gap-1 text-[#D4AF37]">
-                  <Sparkles className="w-3 h-3 animate-pulse" />
+              {link.isAi ? (
+                <span className="inline-flex items-center gap-1.5 text-[#D4AF37]">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                   {link.label}
                 </span>
+              ) : (
+                link.label
               )}
-              {!link.isAi && link.label}
               {activePage === link.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]" />
+                <motion.span
+                  layoutId="activeNavIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#D4AF37] rounded-full shadow-[0_0_12px_#D4AF37]"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
               )}
             </button>
           ))}
         </nav>
 
         {/* Actions Bar */}
-        <div className="flex items-center space-x-4 sm:space-x-5">
+        <div className="flex items-center space-x-3.5 sm:space-x-5">
           {/* AI Search */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={openSearch}
-            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 relative group"
+            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 relative group cursor-pointer"
             title="Natural Language AI Search"
           >
             <Search className="w-5 h-5" />
-            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] bg-black border border-[#D4AF37]/30 text-[#D4AF37] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            <span className="absolute -bottom-9 left-1/2 -translate-x-1/2 text-[10px] bg-black/90 border border-[#D4AF37]/40 text-[#D4AF37] px-2.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">
               AI Search
             </span>
-          </button>
+          </motion.button>
 
           {/* Wishlist */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setActivePage('wishlist')}
-            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 relative"
+            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 relative cursor-pointer"
             title="Wishlist"
           >
             <Heart className="w-5 h-5" />
             {wishlistCount > 0 && (
-              <span className="absolute top-0 right-0 w-4 h-4 bg-[#D4AF37] text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#D4AF37] text-black text-[10px] font-extrabold rounded-full flex items-center justify-center shadow-md"
+              >
                 {wishlistCount}
-              </span>
+              </motion.span>
             )}
-          </button>
+          </motion.button>
 
           {/* Cart Drawer Trigger */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={openCart}
-            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 relative"
+            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 relative cursor-pointer"
             title="Your DHAJ Cart"
           >
             <ShoppingBag className="w-5 h-5" />
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 w-4.5 h-4.5 bg-[#D4AF37] text-black text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-0.5 right-0.5 w-4.5 h-4.5 bg-[#D4AF37] text-black text-[10px] font-extrabold rounded-full flex items-center justify-center animate-pulse shadow-md"
+              >
                 {cartCount}
-              </span>
+              </motion.span>
             )}
-          </button>
+          </motion.button>
 
           {/* User Profile / Auth */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setActivePage('profile')}
-            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2"
+            className="text-stone-300 hover:text-[#D4AF37] transition-colors p-2 cursor-pointer"
             title="Patron Profile"
           >
             <User className="w-5 h-5" />
-          </button>
+          </motion.button>
 
           {/* Admin Dashboard shortcut */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setActivePage('admin')}
-            className="hidden md:flex items-center gap-1.5 text-[10px] tracking-wider uppercase border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black px-3 py-1.5 rounded transition-all"
+            className="hidden md:flex items-center gap-1.5 text-[10px] tracking-wider uppercase border border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black px-3.5 py-1.5 rounded-lg transition-all cursor-pointer bg-[#0A0A0E]/60 shadow-md"
             title="Admin Dashboard"
           >
             <Shield className="w-3.5 h-3.5" />
             Admin
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0A0A0E] border-b border-[#D4AF37]/20 px-6 py-6 space-y-4">
-          {navLinks.map((link) => (
-            <button
-              key={link.id}
-              onClick={() => {
-                setActivePage(link.id);
-                setMobileMenuOpen(false);
-              }}
-              className={`block w-full text-left font-serif text-sm tracking-widest uppercase py-2 border-b border-white/5 ${
-                activePage === link.id ? 'text-[#D4AF37]' : 'text-stone-300'
-              }`}
-            >
-              {link.isAi ? `✨ ${link.label}` : link.label}
-            </button>
-          ))}
-          <div className="pt-2 flex justify-between items-center text-xs text-stone-400">
-            <button onClick={() => { setActivePage('admin'); setMobileMenuOpen(false); }} className="text-[#D4AF37]">
-              Admin Portal
-            </button>
-            <button onClick={() => { setActivePage('about'); setMobileMenuOpen(false); }}>
-              Our Story
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            className="lg:hidden bg-[#0A0A0E]/95 backdrop-blur-xl border-b border-[#D4AF37]/30 px-6 py-6 space-y-4 overflow-hidden"
+          >
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => {
+                  setActivePage(link.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`block w-full text-left font-serif text-sm tracking-widest uppercase py-2.5 border-b border-white/5 cursor-pointer ${
+                  activePage === link.id ? 'text-[#D4AF37] font-bold' : 'text-stone-300'
+                }`}
+              >
+                {link.isAi ? `✨ ${link.label}` : link.label}
+              </button>
+            ))}
+            <div className="pt-3 flex justify-between items-center text-xs text-stone-400">
+              <button onClick={() => { setActivePage('admin'); setMobileMenuOpen(false); }} className="text-[#D4AF37] font-semibold cursor-pointer">
+                Admin Portal
+              </button>
+              <button onClick={() => { setActivePage('about'); setMobileMenuOpen(false); }} className="cursor-pointer hover:text-white">
+                Our Story
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

@@ -7,6 +7,7 @@
     background-color: #050506;
     color: #F9F9FB;
     font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
   }
   
   h1, h2, h3, h4, .font-serif-luxury {
@@ -18,8 +19,10 @@
 /* Custom Gold Text & Gradients */
 .text-gold-gradient {
   background: linear-gradient(135deg, #FFFDD0 0%, #F5D77D 30%, #D4AF37 70%, #996515 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: shine-text 6s ease-in-out infinite alternate;
 }
 
 .bg-gold-gradient {
@@ -28,25 +31,54 @@
 
 .border-gold-glow {
   border-color: rgba(212, 175, 55, 0.4);
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
 }
 
 .glass-obsidian {
-  background: rgba(14, 14, 18, 0.75);
+  background: rgba(14, 14, 18, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .glass-card {
   background: rgba(22, 22, 28, 0.6);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(212, 175, 55, 0.4);
-  box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 15px 35px -10px rgba(212, 175, 55, 0.25);
+  transform: translateY(-4px);
+}
+
+/* Metallic Shimmer Sweep effect */
+.shimmer-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 70%
+  );
+  transform: rotate(30deg) translateX(-100%);
+  transition: transform 0.8s ease;
+}
+
+.shimmer-button:hover::after {
+  transform: rotate(30deg) translateX(100%);
 }
 
 /* Luxury Custom Scrollbar */
@@ -63,4 +95,28 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #D4AF37;
+}
+
+/* Animations */
+@keyframes shine-text {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
 }

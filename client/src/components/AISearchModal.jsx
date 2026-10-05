@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Sparkles } from 'lucide-react';
 import { useAIStore } from '../store/aiStore';
 
@@ -8,8 +9,6 @@ export default function AISearchModal({ setActivePage, setSelectedProduct, produ
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
 
-  if (!isSearchOpen) return null;
-
   const samplePrompts = [
     'Black embroidered kurta for Eid under 15000',
     'Royal obsidian velvet waistcoat for Groom',
@@ -18,7 +17,7 @@ export default function AISearchModal({ setActivePage, setSelectedProduct, produ
     'Handmade khussa for wedding',
   ];
 
-  // ── Local AI parser (works without any backend) ───────────────────────────
+  // Local AI parser (works without any backend)
   const parseAndSearch = (q) => {
     const lower = q.toLowerCase();
 
@@ -93,125 +92,150 @@ export default function AISearchModal({ setActivePage, setSelectedProduct, produ
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-start justify-center pt-16 sm:pt-24 px-4">
-      <div className="bg-[#0A0A0E] border border-[#D4AF37]/30 w-full max-w-2xl rounded-xl p-6 shadow-2xl relative">
-        {/* Close */}
-        <button
-          onClick={() => {
-            closeSearch();
-            setResults(null);
-            setQuery('');
-          }}
-          className="absolute top-4 right-4 text-stone-400 hover:text-[#D4AF37] p-1"
+    <AnimatePresence>
+      {isSearchOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-start justify-center pt-16 sm:pt-24 px-4"
         >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-[#D4AF37]" />
-          <h3 className="font-serif text-base tracking-widest text-white uppercase">
-            DHAJ Smart AI Fashion Search
-          </h3>
-        </div>
-
-        {/* Search Form */}
-        <form onSubmit={handleSearchSubmit} className="relative mb-6">
-          <input
-            type="text"
-            placeholder="e.g. 'Black embroidered kurta for Eid under 15000'…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-[#14141A] border border-stone-800 focus:border-[#D4AF37] text-sm text-white px-4 py-3.5 pl-11 rounded-lg focus:outline-none"
-            autoFocus
-          />
-          <Search className="w-5 h-5 absolute left-3.5 top-4 text-stone-400" />
-          <button
-            type="submit"
-            disabled={loading}
-            className="absolute right-2 top-2 bottom-2 bg-[#D4AF37] text-black px-4 rounded text-xs font-bold uppercase hover:bg-[#AA8825] transition-colors disabled:opacity-60"
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0, y: -20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.92, opacity: 0, y: -20 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            className="bg-[#0A0A0E] border border-[#D4AF37]/40 w-full max-w-2xl rounded-2xl p-6 shadow-[0_0_60px_rgba(212,175,55,0.25)] relative glass-obsidian"
           >
-            {loading ? 'Searching…' : 'Search'}
-          </button>
-        </form>
-
-        {/* Sample Prompts */}
-        {!results && (
-          <div>
-            <span className="text-[11px] text-stone-400 uppercase tracking-widest block mb-2 font-serif">
-              Suggested Fashion Prompts:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {samplePrompts.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setQuery(prompt)}
-                  className="bg-[#121216] hover:border-[#D4AF37] border border-stone-800 text-xs text-stone-300 px-3 py-1.5 rounded-full transition-colors"
-                >
-                  ✨ {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Results */}
-        {results && (
-          <div className="mt-6 space-y-4">
-            {/* Intent Breakdown */}
-            <div className="bg-[#121218] p-3 rounded border border-[#D4AF37]/20 text-xs text-stone-300">
-              <span className="text-[#D4AF37] font-semibold block mb-1">DHAJ AI Intent Breakdown:</span>
-              <p>{results.aiSummary}</p>
-              <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-stone-400">
-                <span>Category: <strong className="text-white">{results.parsedIntent.category}</strong></span>
-                <span>Max Budget: <strong className="text-white">{results.parsedIntent.maxPrice}</strong></span>
-                <span>Occasion: <strong className="text-white">{results.parsedIntent.occasion}</strong></span>
-              </div>
-            </div>
-
-            {/* Product Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-72 overflow-y-auto pr-1">
-              {results.products?.map((p) => (
-                <div
-                  key={p._id}
-                  onClick={() => {
-                    setSelectedProduct(p);
-                    setActivePage('product-details');
-                    closeSearch();
-                    setResults(null);
-                    setQuery('');
-                  }}
-                  className="flex gap-3 bg-[#111116] p-2.5 rounded border border-stone-800 hover:border-[#D4AF37] cursor-pointer transition-colors"
-                >
-                  <img
-                    src={p.images[0]}
-                    alt={p.name}
-                    className="w-16 h-20 object-cover rounded"
-                  />
-                  <div>
-                    <h4 className="font-serif text-xs text-white font-medium line-clamp-2">{p.name}</h4>
-                    <p className="text-[11px] text-[#D4AF37] font-bold mt-1">
-                      PKR {(p.salePrice || p.price).toLocaleString()}
-                    </p>
-                    <span className="text-[10px] text-stone-400 capitalize">{p.category}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Reset */}
-            <button
+            {/* Close */}
+            <motion.button
+              whileTap={{ scale: 0.85 }}
               onClick={() => {
+                closeSearch();
                 setResults(null);
                 setQuery('');
               }}
-              className="text-xs text-stone-500 hover:text-[#D4AF37] underline"
+              className="absolute top-4 right-4 text-stone-400 hover:text-[#D4AF37] p-1.5 rounded-full border border-stone-800 hover:border-[#D4AF37] transition-all cursor-pointer"
             >
-              ← New Search
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+              <X className="w-5 h-5" />
+            </motion.button>
+
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-[#D4AF37] animate-pulse" />
+              <h3 className="font-serif text-base tracking-widest text-white uppercase font-bold">
+                DHAJ Smart AI Fashion Search
+              </h3>
+            </div>
+
+            {/* Search Form */}
+            <form onSubmit={handleSearchSubmit} className="relative mb-6">
+              <input
+                type="text"
+                placeholder="e.g. 'Black embroidered kurta for Eid under 15000'…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-[#14141A] border border-stone-800 focus:border-[#D4AF37] text-sm text-white px-4 py-3.5 pl-11 pr-24 rounded-xl focus:outline-none shadow-inner"
+                autoFocus
+              />
+              <Search className="w-5 h-5 absolute left-3.5 top-4 text-stone-400" />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                disabled={loading}
+                className="absolute right-2 top-2 bottom-2 bg-[#D4AF37] text-black px-4 rounded-lg text-xs font-bold uppercase hover:bg-[#AA8825] transition-colors disabled:opacity-60 cursor-pointer shadow-md"
+              >
+                {loading ? 'Searching…' : 'Search'}
+              </motion.button>
+            </form>
+
+            {/* Sample Prompts */}
+            {!results && (
+              <div>
+                <span className="text-[11px] text-stone-400 uppercase tracking-widest block mb-2 font-serif font-semibold">
+                  Suggested Fashion Prompts:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {samplePrompts.map((prompt, idx) => (
+                    <motion.button
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
+                      key={idx}
+                      onClick={() => setQuery(prompt)}
+                      className="bg-[#121216] hover:border-[#D4AF37] border border-stone-800 text-xs text-stone-300 px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
+                    >
+                      ✨ {prompt}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Results */}
+            {results && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 space-y-4"
+              >
+                {/* Intent Breakdown */}
+                <div className="bg-[#121218] p-3.5 rounded-xl border border-[#D4AF37]/30 text-xs text-stone-300">
+                  <span className="text-[#D4AF37] font-semibold block mb-1">DHAJ AI Intent Breakdown:</span>
+                  <p className="font-light">{results.aiSummary}</p>
+                  <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-stone-400">
+                    <span>Category: <strong className="text-white">{results.parsedIntent.category}</strong></span>
+                    <span>Max Budget: <strong className="text-white">{results.parsedIntent.maxPrice}</strong></span>
+                    <span>Occasion: <strong className="text-white">{results.parsedIntent.occasion}</strong></span>
+                  </div>
+                </div>
+
+                {/* Product Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-72 overflow-y-auto pr-1">
+                  {results.products?.map((p) => (
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      key={p._id}
+                      onClick={() => {
+                        setSelectedProduct(p);
+                        setActivePage('product-details');
+                        closeSearch();
+                        setResults(null);
+                        setQuery('');
+                      }}
+                      className="flex gap-3 bg-[#111116] p-2.5 rounded-xl border border-stone-800 hover:border-[#D4AF37] cursor-pointer transition-all"
+                    >
+                      <img
+                        src={p.images[0]}
+                        alt={p.name}
+                        className="w-16 h-20 object-cover rounded-lg"
+                      />
+                      <div>
+                        <h4 className="font-serif text-xs text-white font-medium line-clamp-2">{p.name}</h4>
+                        <p className="text-[11px] text-[#D4AF37] font-bold mt-1">
+                          PKR {(p.salePrice || p.price).toLocaleString()}
+                        </p>
+                        <span className="text-[10px] text-stone-400 capitalize">{p.category}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Reset */}
+                <button
+                  onClick={() => {
+                    setResults(null);
+                    setQuery('');
+                  }}
+                  className="text-xs text-stone-500 hover:text-[#D4AF37] underline cursor-pointer"
+                >
+                  ← New Search
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

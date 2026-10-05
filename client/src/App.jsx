@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Components
 import DhajLoader from './components/DhajLoader';
+import ParticleBackground from './components/ParticleBackground';
 import Navbar from './components/Navbar';
 import MobileNav from './components/MobileNav';
 import Footer from './components/Footer';
@@ -436,15 +438,30 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050506] text-[#F9F9FB] flex flex-col justify-between selection:bg-[#D4AF37] selection:text-black">
+    <div className="min-h-screen bg-[#050506] text-[#F9F9FB] flex flex-col justify-between selection:bg-[#D4AF37] selection:text-black relative">
+      {/* Interactive Luxury Particle Background */}
+      <ParticleBackground />
+
       {/* Initial Premium DHAJ Loader Animation */}
       <DhajLoader />
 
       {/* Global Header Navigation */}
       <Navbar activePage={activePage} setActivePage={setActivePage} />
 
-      {/* Main Content Area */}
-      <main className="flex-1">{renderPage()}</main>
+      {/* Main Content Area with Smooth Page Transition */}
+      <main className="flex-1 relative z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activePage}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+          >
+            {renderPage()}
+          </motion.div>
+        </AnimatePresence>
+      </main>
 
       {/* Slide-over Drawers & Modals */}
       <CartDrawer setActivePage={setActivePage} />
